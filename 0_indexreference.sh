@@ -4,7 +4,7 @@
 #PBS -l walltime=8:00:00
 #PBS -j oe
 
-# this script takes gziped reference genome fasta file and prepares
+# this script takes reference genome fasta file and prepares
 # it for aligning with bwa, indices and dictionaries are built by several
 # programs. 
 # input reference fasta should be specified by variable ref
@@ -21,13 +21,13 @@ module add picard-2.8.1
 module add samtools-1.4
 module add bwa-0.7.15
 module add htslib-1.6
-##bgzip if not
+##bgzip deprecated
 
-if [[ $ref != *.gz ]]
-then
-bgzip -c $ref > ${ref}.gz
-ref=${ref}.gz
-fi
+#if [[ $ref != *.gz ]]
+#then
+#bgzip -c $ref > ${ref}.gz
+#ref=${ref}.gz
+#fi
 
 
 java -jar $PICARD281 CreateSequenceDictionary R=${ref} O=${ref/fasta/dict}
