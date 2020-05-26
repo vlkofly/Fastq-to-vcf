@@ -10,15 +10,16 @@ The pipeline is optimised to run on servers with [PBS professional](https://www.
 
 Major variables for each step of the pipeline can be defined either with an argument or inscript.
 
-0_indexreference.sh: It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
+*0_indexreference.sh*: It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
 You need to supply relative path to the fasta file with argument ref. 
 Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
 
-1_mapreads.py:  This Python script generates separate shell script per every sample that contain commands to: 
+*1_mapreads.py*:  This Python script generates separate shell script per every sample that contain commands to: 
 - Analyse quality of fastq reads with Fastqc (ver. 0.11.5)
 - Trim bad quality reads with TRIMMOMATIC (ver. 0.36) 
 - Map reads to the reference with BWA mem (ver. 0.7.15)
 - Mark duplicates with Picard (ver. 2.8.1)
+
 Output is sorted and deduplicated bam file, accompanied with multiple descriptive statistics of mapping that can be analysed by a program Multiqc.
 You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming: fastq_name\tnew_name\tadaptors\n
 Other required arguemnts are -wd = working directory; -datadir = directory with fastq files.
@@ -46,4 +47,6 @@ You have to supply following variables
 -sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.
 -NV=yes if you want to run the joint genotype calling for both invariant and variant sites
 See further options and notes within the script.
-Example how to run the script: 
+Example how to run the script: `qsub -v 'samples=v3.samplelist.txt,outvcf=outvcf.vcf.gz,sourcedirs=/home/analysis/HC,outdir=finalvcf,ref=fullpath_to_reference_folder' ~/Fastq-to-vcf/3_genotypeGVCF.sh`
+
+ 
