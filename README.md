@@ -1,7 +1,7 @@
 # Fastq-to-vcf
 
 
-## Pipeline to turn whole-genome resequencing data (fastq) to a variant calling format file (vcf)
+## Pipeline to turn whole-genome resequencing data (fastq) into a variant calling format file (vcf)
 
 The pipeline consists of filtering raw fastq data, mapping them on a reference and calling and filtering genotypes by GATK best practices.
 It has been gradually developed by Levi Yant, Jeff DaCosta, Christian Sailer and Jakub Vlček 
