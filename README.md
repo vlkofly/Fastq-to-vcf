@@ -36,12 +36,12 @@ Example how to run the script:
 #### This script takes the bam files from previous step and proceeds with per individual variant calling via the GATK tool 'HaplotypeCaller'.
 - All following steps use GATK (ver. 3.7)
  
-You have to supply a -ploidyfile with one column of samplenames and second column with ploidy level. (samplename\t2\n) 
-A seperate shell script is created for each sample and sent via qsub to the METACENTRUM cluster. 
-If the output directory does not exist, it is created automatically.
-You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)
-Also you can only print the bash script instead of submitting it by qsub if you set -print t
-See further options and guidlines within the script. 
+You have to supply a -ploidyfile with one column of samplenames and second column with ploidy level. (samplename\t2\n)  
+A seperate shell script is created for each sample and sent via qsub to the METACENTRUM cluster.   
+If the output directory does not exist, it is created automatically.  
+You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)  
+Also you can only print the bash script instead of submitting it by qsub if you set -print t  
+See further options and guidlines within the script.  
 Example how to run the script:  
 `python3 ~/Fastq-to-vcf/2_callvars.py -ploidyfile ploidy.tsv -o ../HC -workdir "pwd"`
 
@@ -87,7 +87,7 @@ Here is the outline of the procedures encoded within the script and description 
 - Log file for each step ends with .log
 - Key files ready to use in bold, other files kept for debugging and you-never-know-when-you-need purposes.
 - Key strings follows consecutively as the corresponding files are created in the process:  
-**VCF FILES** (important files that will be most likely used in following analyses in bold)
+**VCF FILES** 
 - novarsel = invariant sites only
 - novarfilt = invariant sites after filtration (annotation added)
 - novarpassed = invariant sites that have passed the filters
