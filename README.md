@@ -17,7 +17,7 @@ You need to supply relative path to the fasta file with argument ref.
 Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
 
 ### 1_mapreads.py
-#### This script generates separate shell script per every sample that contain commands to: 
+#### This script generates separate shell script per every sample that contains commands to: 
 - Analyse quality of fastq reads with Fastqc (ver. 0.11.5)
 - Trim bad quality reads with TRIMMOMATIC (ver. 0.36) 
 - Map reads to the reference with BWA mem (ver. 0.7.15)
@@ -32,7 +32,7 @@ See further options and guidlines within the script.
 Example how to run the script: `python3 ~/Fastq-to-vcf/1_mapreads.py -samplenames sn.tsv -wd "pwd" -datadir ../fastq_data -trial t -ref fullpath_to_reference_folder`
 
 ### 2_callvars.py
-#### This script takes the bam files from previous step and proceeds with per individual variant calling via the GATK tool 'HaplotypeCaller.
+#### This script takes the bam files from previous step and proceeds with per individual variant calling via the GATK tool 'HaplotypeCaller'.
 - All following steps use GATK (ver. 3.7)
  
 You have to supply a -ploidyfile with one column of samplenames and second column with ploidy level 2/4. 
@@ -60,11 +60,17 @@ Example how to run the script: `qsub -v 'samples=v3.samplelist.txt,outvcf=outvcf
 #### This script filters the raw vcf file from previou step according to GATK best practices
 You have to supply following variables
 -vcf_var= relative path to vcf file with only variants
+
 -vcf_all (optional) = relative path to vcf with all sites (source of invariant sites, if you want to get number of callable sites)
+
 -ref=full path to a reference folder
+
 -outdir=output directory
+
 -sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.
+
 -simple=yes if you want to run simplified version of filtering - see details inscript.
+
 You also have to specify mask files, if you want to remove some sites from vcf (defined within the script) and fourfold site annotation
 Here is the outline of the procedures encoded within the script and description of the output files:
 ##### Script outline:
