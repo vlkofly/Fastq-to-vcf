@@ -24,8 +24,15 @@ Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf
 - Mark duplicates with Picard (ver. 2.8.1)
 
 Output is sorted and deduplicated bam file, accompanied with multiple descriptive statistics of mapping that can be analysed by a program Multiqc.  
-You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming (fastq_name\tnew_name\tadaptors\n)  
-Other required arguemnts are -wd = working directory; -datadir = directory with fastq files.  
+You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming:  
+(fastq_name\tnew_name\tadaptors\n)
+15-AA208a	BAB_01da	TruSeq3-PE-2.fa
+16-AA208n	BAB_02da	TruSeq3-PE-2.fa
+.	.	.
+
+Other required arguemnts are:  
+-wd = working directory 
+-datadir = directory with fastq files (the program will recursively search this folder for all fastq files)  
 You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)  
 Also you can only print the bash script instead of submitting it by qsub if you set -print t  
 See further options and guidlines within the script.  
