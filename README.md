@@ -23,12 +23,12 @@ Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf
 - Map reads to the reference with BWA mem (ver. 0.7.15)
 - Mark duplicates with Picard (ver. 2.8.1)
 
-Output is sorted and deduplicated bam file, accompanied with multiple descriptive statistics of mapping that can be analysed by a program Multiqc.
-You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming: fastq_name\tnew_name\tadaptors\n
-Other required arguemnts are -wd = working directory; -datadir = directory with fastq files.
-You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)
-Also you can only print the bash script instead of submitting it by qsub if you set -print t
-See further options and guidlines within the script. 
+Output is sorted and deduplicated bam file, accompanied with multiple descriptive statistics of mapping that can be analysed by a program Multiqc.  
+You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming: fastq_name\tnew_name\tadaptors\n  
+Other required arguemnts are -wd = working directory; -datadir = directory with fastq files.  
+You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)  
+Also you can only print the bash script instead of submitting it by qsub if you set -print t  
+See further options and guidlines within the script.   
 Example how to run the script: `python3 ~/Fastq-to-vcf/1_mapreads.py -samplenames sn.tsv -wd "pwd" -datadir ../fastq_data -trial t -ref fullpath_to_reference_folder`
 
 ### 2_callvars.py
@@ -45,34 +45,28 @@ Example how to run the script: `python3 ~/Fastq-to-vcf/2_callvars.py -ploidyfile
 
 ### 3_genotypeGVCF.sh
 #### This script takes the GVCFs files from previous step and creates the final vcf by joint genotyping.
-You have to supply following variables
--samples=file containing list of samples
--outvcf=name of output vcf file
--sourcedirs=list of directories (fullpath) with GVCFs files (input files will be fetched from there) 
--outdir=output directory
--ref=full path to a reference folder
--sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.
--NV=yes if you want to run the joint genotype calling for both invariant and variant sites
-See further options and notes within the script.
+You have to supply following variables  
+-samples=file containing list of samples  
+-outvcf=name of output vcf file  
+-sourcedirs=list of directories (fullpath) with GVCFs files (input files will be fetched from there)  
+-outdir=output directory 
+-ref=full path to a reference folder  
+-sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.  
+-NV=yes if you want to run the joint genotype calling for both invariant and variant sites  
+See further options and notes within the script.  
 Example how to run the script: `qsub -v 'samples=v3.samplelist.txt,outvcf=outvcf.vcf.gz,sourcedirs=/home/analysis/HC,outdir=finalvcf,ref=fullpath_to_reference_folder' ~/Fastq-to-vcf/3_genotypeGVCF.sh`
 
 ### 4_filter.sh
 #### This script filters the raw vcf file from previou step according to GATK best practices
 You have to supply following variables
--vcf_var= relative path to vcf file with only variants
-
--vcf_all (optional) = relative path to vcf with all sites (source of invariant sites, if you want to get number of callable sites)
-
--ref=full path to a reference folder
-
--outdir=output directory
-
--sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.
-
--simple=yes if you want to run simplified version of filtering - see details inscript.
-
-You also have to specify mask files, if you want to remove some sites from vcf (defined within the script) and fourfold site annotation
-Here is the outline of the procedures encoded within the script and description of the output files:
+-vcf_var= relative path to vcf file with only variants  
+-vcf_all (optional) = relative path to vcf with all sites (source of invariant sites, if you want to get number of callable sites)  
+-ref=full path to a reference folder  
+-outdir=output directory  
+-sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.  
+-simple=yes if you want to run simplified version of filtering - see details inscript.  
+You also have to specify mask files, if you want to remove some sites from vcf (defined within the script) and fourfold site annotation  
+Here is the outline of the procedures encoded within the script and description of the output files:  
 ##### Script outline:
 1. Hardfilter biallelic sites (BI) with GATK best practices 
 2. Select BI sites that passed the filters
@@ -116,16 +110,6 @@ Here is the outline of the procedures encoded within the script and description 
 - sample.depth.summary.tsv = depth summary for each sample over all scaffolds
 - sample.quality.summary.tsv = genotype quality (GQ) summary for each sample over all scaffolds
 - excess_depth_positions_count.table.tsv = positions that showed excessive depth mean+2sd, column n shows in how many samples the limit was exceeded.
-
-
-
-
-
-
-
-
-
-
 
 Example how to run the script: ``
 
