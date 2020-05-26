@@ -14,7 +14,8 @@ Major variables for each step of the pipeline can be defined either with an argu
 #### It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
 
 You need to supply relative path to the fasta file with argument ref. 
-Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
+Example how to run the script:   
+`qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
 
 ### 1_mapreads.py
 #### This script generates separate shell script per every sample that contains commands to: 
@@ -36,7 +37,7 @@ Other required arguemnts are:
 You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)  
 Also you can only print the bash script instead of submitting it by qsub if you set -print t  
 See further options and guidlines within the script.  
-Example how to run the script: 
+Example how to run the script:  
 `python3 ~/Fastq-to-vcf/1_mapreads.py -samplenames sn.tsv -wd "pwd" -datadir ../fastq_data -trial t -ref fullpath_to_reference_folder`
 
 ### 2_callvars.py
