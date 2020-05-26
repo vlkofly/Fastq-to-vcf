@@ -43,7 +43,7 @@ if [ -z "$sourcedirs" ]; then
         exit 1
         fi
 
-if [ "$NV" == "yes" ]; then # if you supply some text in variable NV, gatk will do calling of all sites not only variants
+if [ "$NV" == "yes" ]; then # if you supply "yes" in variable NV, gatk will do calling of all sites not only variants
 	echo "calling all sites"
 	NV="--includeNonVariantSites"
 else
