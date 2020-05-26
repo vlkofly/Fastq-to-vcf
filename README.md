@@ -24,29 +24,31 @@ Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf
 - Mark duplicates with Picard (ver. 2.8.1)
 
 Output is sorted and deduplicated bam file, accompanied with multiple descriptive statistics of mapping that can be analysed by a program Multiqc.  
-You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming: fastq_name\tnew_name\tadaptors\n  
+You have to supply samplename file that links name of a fastq file with a sample name and adaptors that will be used for trimming (fastq_name\tnew_name\tadaptors\n)  
 Other required arguemnts are -wd = working directory; -datadir = directory with fastq files.  
 You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)  
 Also you can only print the bash script instead of submitting it by qsub if you set -print t  
-See further options and guidlines within the script.   
-Example how to run the script: `python3 ~/Fastq-to-vcf/1_mapreads.py -samplenames sn.tsv -wd "pwd" -datadir ../fastq_data -trial t -ref fullpath_to_reference_folder`
+See further options and guidlines within the script.  
+Example how to run the script: 
+`python3 ~/Fastq-to-vcf/1_mapreads.py -samplenames sn.tsv -wd "pwd" -datadir ../fastq_data -trial t -ref fullpath_to_reference_folder`
 
 ### 2_callvars.py
 #### This script takes the bam files from previous step and proceeds with per individual variant calling via the GATK tool 'HaplotypeCaller'.
 - All following steps use GATK (ver. 3.7)
  
-You have to supply a -ploidyfile with one column of samplenames and second column with ploidy level 2/4. 
+You have to supply a -ploidyfile with one column of samplenames and second column with ploidy level. (samplename\t2\n) 
 A seperate shell script is created for each sample and sent via qsub to the METACENTRUM cluster. 
 If the output directory does not exist, it is created automatically.
 You can also run the script only for the first sample (-trial t) from the list to check errors and if there are none run the analysis for the rest of the samples (-trial r)
 Also you can only print the bash script instead of submitting it by qsub if you set -print t
-See further options and guidlines within the script.
-Example how to run the script: `python3 ~/Fastq-to-vcf/2_callvars.py -ploidyfile ploidy.tsv -o ../HC -workdir "pwd"`
+See further options and guidlines within the script. 
+Example how to run the script:  
+`python3 ~/Fastq-to-vcf/2_callvars.py -ploidyfile ploidy.tsv -o ../HC -workdir "pwd"`
 
 ### 3_genotypeGVCF.sh
 #### This script takes the GVCFs files from previous step and creates the final vcf by joint genotyping.
 You have to supply following variables  
--samples=file containing list of samples  
+-samples=file containing list of samples (substring of the GVCFs file) one sample a line  
 -outvcf=name of output vcf file  
 -sourcedirs=list of directories (fullpath) with GVCFs files (input files will be fetched from there)  
 -outdir=output directory 
@@ -54,7 +56,8 @@ You have to supply following variables
 -sc=file with scaffolds/chromosomes to parallelize over. One scaffold per line. This allows to run separate jobs for each scaffold.  
 -NV=yes if you want to run the joint genotype calling for both invariant and variant sites  
 See further options and notes within the script.  
-Example how to run the script: `qsub -v 'samples=v3.samplelist.txt,outvcf=outvcf.vcf.gz,sourcedirs=/home/analysis/HC,outdir=finalvcf,ref=fullpath_to_reference_folder' ~/Fastq-to-vcf/3_genotypeGVCF.sh`
+Example how to run the script:  
+`qsub -v 'samples=v3.samplelist.txt,outvcf=outvcf.vcf.gz,sourcedirs=/home/analysis/HC,outdir=finalvcf,ref=fullpath_to_reference_folder' ~/Fastq-to-vcf/3_genotypeGVCF.sh`
 
 ### 4_filter.sh
 #### This script filters the raw vcf file from previou step according to GATK best practices
@@ -83,8 +86,8 @@ Here is the outline of the procedures encoded within the script and description 
 - Vcf index ends with .tbi (always keep it together with the vcf you use)
 - Log file for each step ends with .log
 - Key files ready to use in bold, other files kept for debugging and you-never-know-when-you-need purposes.
-- Key strings follows consecutively as the corresponding files are created in the process:
-**VCF FILES** # important files that will be most likely used in following analyses in bold
+- Key strings follows consecutively as the corresponding files are created in the process:  
+**VCF FILES** (important files that will be most likely used in following analyses in bold)
 - novarsel = invariant sites only
 - novarfilt = invariant sites after filtration (annotation added)
 - novarpassed = invariant sites that have passed the filters
@@ -96,7 +99,7 @@ Here is the outline of the procedures encoded within the script and description 
 - **fourfold.filtered = same as merged.filtered but restricted to fourfold sites**
 - fourfold.dp8 = fourfold biallelic snps filtered for depth 8
 - fourfold.dp8nc = fourfold biallelic snps filtered for depth 8, GF that did not passed set to nocall
-- **fourfold.dp8nc.m0.5 = fourfold biallelic snps with max fraction of missing individual genotypes 0.5**
+- **fourfold.dp8nc.m0.5 = fourfold biallelic snps with max fraction of missing individual genotypes 0.5**  
 **DESCRIPTIVE FILES**
 - numbers_in_vcf_files.ssv = number of sites in vcf files
 - prefix vartable. = output of command variantsToTable, generated for selection of vcf files and later this table is taken by rscript **parse_variant_table3.R**  that prints some aspects of the results
@@ -111,7 +114,21 @@ Here is the outline of the procedures encoded within the script and description 
 - sample.quality.summary.tsv = genotype quality (GQ) summary for each sample over all scaffolds
 - excess_depth_positions_count.table.tsv = positions that showed excessive depth mean+2sd, column n shows in how many samples the limit was exceeded.
 
-Example how to run the script: ``
+Example how to run the script:  
+`qsub -v 'vcf_var=snp/halleri_snp_raw.vcf.gz,vcf_all=all/halleri_all_raw.vcf.gz,ref=fullpath_to_reference_folder'  ~/Fastq-to-vcf/4_filter.sh`
 
-### examples of definition files
- 
+### other scripts
+
+#### map_single_end.py
+version of 1_mapreads.py script that maps fastq reads from single end sequencing
+#### map_unsorted.py
+version of 1_mapreads.py script that sorts fastq reads before mapping
+#### parse_variant_table3.R
+R script to analyse filtering statistics.
+It takes one argument, input file, table from command variants to table
+#### run_variant_stat.sh
+separate script that generates variant to table and then analyse it with parse_variant_table3.R
+#### V3_NOparallel.sh
+version of 3_genotypeGVCF.sh that does not use parallelisation per scaffold 
+
+
