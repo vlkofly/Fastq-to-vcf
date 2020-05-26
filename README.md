@@ -13,7 +13,7 @@ Major variables for each step of the pipeline can be defined either with an argu
 ### 0_indexreference.sh
 #### It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
 
-You need to supply relative path to the fasta file with argument ref. 
+You need to supply relative path to the fasta file with argument ref.   
 Example how to run the script:   
 `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
 
