@@ -10,11 +10,14 @@ The pipeline is optimised to run on servers with [PBS professional](https://www.
 
 Major variables for each step of the pipeline can be defined either with an argument or inscript.
 
-## 0_indexreference.sh: It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
+### 0_indexreference.sh
+#### It prepares the reference genome in fasta format - creates all the necessary indices for mapping the reads with BWA.
+
 You need to supply relative path to the fasta file with argument ref. 
 Example how to run the script: `qsub -v 'ref=yourreference.fasta' ~/Fastq-to-vcf/0_indexreference.sh`
 
-## 1_mapreads.py:  This Python script generates separate shell script per every sample that contain commands to: 
+### 1_mapreads.py
+#### This Python script generates separate shell script per every sample that contain commands to: 
 - Analyse quality of fastq reads with Fastqc (ver. 0.11.5)
 - Trim bad quality reads with TRIMMOMATIC (ver. 0.36) 
 - Map reads to the reference with BWA mem (ver. 0.7.15)
