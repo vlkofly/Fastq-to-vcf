@@ -30,20 +30,23 @@ parser.add_argument('-print', type=str, metavar='print', default='false', help='
 parser.add_argument('-trial', type=str, metavar='trial', default='false', help='If changed to t then only one job will be submitted to Metacentrum to check what is going on, and if changed to r the rest of the samples will be processed (all except the first one)')
 parser.add_argument('-fastqc', type=str, metavar='fastqc', default='false', help='If changed to t fastqc analysis of fasta will be carried out, default is no fastqc analysis')
 parser.add_argument('-ref', type=str, metavar='ref', required=True, help='full path to reference fasta file, the folder must contain indexes and dictionaries e.g. created by indexreference.sh')
+parser.add_argument('-outdir', type=str, metavar='outdir',default='p2m1m2result', required=False, help='Indicate output directory')
 args = parser.parse_args()
 
 # inscript input variables
-wt = '40:00:00' # walltime
+wt = '80:00:00' # walltime
 ncpu = 6 # number of cores
-mem = 350 # size of memory in Gb
+mem = 200# size of memory in Gb
 scratch = 320 # size of scratch directory in Gb
 refpath = os.path.split(args.ref)[0]
 rext = '.fastq.gz' # check for multiple fastq extensions
+#rext = '.fq.gz' # check for multiple fastq extensions
 #rext2 = '.fastq.bz2' # check for multiple fastq extensions
 ref = os.path.split(os.path.split(args.ref)[-2])[-1]+"/"+os.path.split(args.ref)[-1] # name of reference genome with the folder
 print (ref)
 platform = 'illumina' # platform for flagging
-resdir = '/p2m1m2result' # outputdir
+#resdir = '/p2m1m2result' # outputdir
+resdir =  '/'+args.outdir# outputdir
 coding = 'JIC_reference/LyV2_genes_only.bed' # in the case of calculation of depth of coverage of coding regions supply the annotation bed file into reference folder and specify here
 adapter_dir="/storage/brno3-cerit/home/filip_kolar/600_genomes/adapters/" # directory with TRIMMOMATIC adapter files
 tag = 'p2m1m2_' # this tag will be attached to output bamfiles
@@ -210,10 +213,10 @@ for s in samples:
     ###samtools final stats
     sh.write('parallel -j '+str(ncpu-1)+' "samtools {} '+s+'dedup.bam > logstat/'+s+'.{}.txt" ::: idxstats flagstat stats\n\n')
 
-    sh.write("samtools depth "+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" + 
+    sh.write("samtools depth -q 20 -Q 15"+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" + 
         " > logstat/depth_"+s+".txt \n")
-    sh.write("samtools depth -b "+coding+"  "+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" +
-       " > logstat/codingdepth_"+s+".txt \necho stats done at `date`\n\n") # the file will contain one number: mean of coverage
+   # sh.write("samtools depth -b "+coding+"  "+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" +
+   #    " > logstat/codingdepth_"+s+".txt \necho stats done at `date`\n\n") # the file will contain one number: mean of coverage
     # rename to new name
     sh.write('mv '+s+'dedup.bam '+nw+'_final.bam\n')
     sh.write('mv '+s+'dedup.bai '+nw+'_final.bai\n\n')

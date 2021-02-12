@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N F1_filter
 #PBS -l walltime=256:00:00
-#PBS -l select=1:ncpus=2:mem=650gb:scratch_local=800gb
+#PBS -l select=1:ncpus=8:mem=650gb:scratch_local=800gb
 #PBS -j oe
 
 # This script takes the results of genotypeGVCF V3 filters data according GATK best practices.
@@ -51,15 +51,17 @@ echo "started at `date`"
 ####define some other variables ( those variables won't change much so I define them inscript)
 
 wd=$PBS_O_WORKDIR
-nt=1 # number of threads change based on number of scaffolds - but it is better to run one job per a scaffold
+nt=8 # number of threads change based on number of scaffolds - but it is better to run one job per a scaffold
 
 refdir=`dirname $ref`
 ref=`echo $ref | sed 's/^.*\/\(.*\/.*\)$/\1/g'`
 scaf=`basename $sc`
 
 # annotations for masking and fourfold sites
-hetmask="/storage/brno3-cerit/home/filip_kolar/lyrata_annotations/Blacklist.Excess.Het.List.Genes.With.5orMore.2PopsMin.AllHet.Sites.GATK.intervals"
-dpmask="/storage/brno3-cerit/home/filip_kolar/lyrata_annotations/Blacklist_allscaff_ExcSites1.6x_maxRD.GATK.intervals"
+#hetmask="/storage/brno3-cerit/home/filip_kolar/lyrata_annotations/Blacklist.Excess.Het.List.Genes.With.5orMore.2PopsMin.AllHet.Sites.GATK.intervals"
+hetmask="/storage/brno3-cerit/home/filip_kolar/halleri_fixedHetPerGene_2orMorePop_5orMoreSites.intervals"
+#dpmask="/storage/brno3-cerit/home/filip_kolar/lyrata_annotations/Blacklist_allscaff_ExcSites1.6x_maxRD.GATK.intervals"
+dpmask="/storage/brno3-cerit/home/filip_kolar/depthmask.negative.halleri.allscaff.10_indiv.GATK.intervals"
 fourfold="/storage/brno3-cerit/home/filip_kolar/lyrata_annotations/four.fold.degenerate.sites.GATK.intervals"
 
 
@@ -193,7 +195,7 @@ if [ "$simple" != "yes" ]; then
 	 -V {.}$bisnp_passed -o {.}$merged_fourfold -nt 1 -XL $hetmask --interval_set_rule INTERSECTION \
 	 -XL $dpmask -L $fourfold &> {.}${merged_fourfold}.log"
 	
-	rm $merged_fourfold
+	#rm $merged_fourfold
 	
 	#mergelist=""
 	#for f in *snps.fourfold.vcf.gz
@@ -212,22 +214,22 @@ if [ "$simple" != "yes" ]; then
 	
 	### depth and missingness filtering of fourfold degenerated snps
 	
-	java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T VariantFiltration -R $ref -V $merged_fourfold \
-	--genotypeFilterExpression "DP < 8" --genotypeFilterName "DP" -log  ${merged_fourfold/fourfold.filtered.vcf.gz/fourfold.dp8.vcf.gz}.log \
-	 -o ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8.vcf.gz} &>/dev/null
+	parallel -a $scaf -j $((nt-1)) "java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T VariantFiltration -R $ref -V {.}$merged_fourfold \
+	--genotypeFilterExpression 'DP < 8' --genotypeFilterName 'DP' -log {.}${merged_fourfold/fourfold.filtered.vcf.gz/fourfold.dp8.vcf.gz}.log \
+	 -o {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8.vcf.gz} &>/dev/null"
 	
-	java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T VariantFiltration -R \
-	$ref -V ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8.vcf.gz} -log ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz}.log \
-	--setFilteredGtToNocall -o ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz} &> /dev/null 
+	parallel -a $scaf -j $((nt-1)) "java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T VariantFiltration -R \
+	$ref -V {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8.vcf.gz} -log {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz}.log \
+	--setFilteredGtToNocall -o {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz} &> /dev/null" 
 	
 	
-	java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T SelectVariants -R \
-	$ref -V ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz} --maxNOCALLfraction 0.5 \
-	-log ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.m0.5.vcf.gz}.log \
-	 -o ${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.m0.5.vcf.gz} &> /dev/null # the only file from this procedure will be the selected variants with less than 50% missingness
+	parallel -a $scaf -j $((nt-1)) "java $tmj -XX:ParallelGCThreads=1 -jar $GATK/GenomeAnalysisTK.jar -T SelectVariants -R \
+	$ref -V {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.vcf.gz} --maxNOCALLfraction 0.5 \
+	-log {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.m0.5.vcf.gz}.log \
+	 -o {.}${merged_fourfold/fourfold.vcf.gz/fourfold.dp8nc.m0.5.vcf.gz} &> /dev/null" # the only file from this procedure will be the selected variants with less than 50% missingness
 	
-	rm ${merged_fourfold/fourfold.gz/fourfold.dp8.gz}*
-	rm ${merged_fourfold/fourfold.gz/fourfold.dp8nc.gz}*
+	#rm ${merged_fourfold/fourfold.gz/fourfold.dp8.gz}*
+	#rm ${merged_fourfold/fourfold.gz/fourfold.dp8nc.gz}*
 fi
 # if there is no variant file then stop here and export snp results:
 
@@ -405,7 +407,6 @@ echo "fourfold degenerated sites exported at `date`"
 echo "vcf_file numvariants"
 ls *vcf.gz | parallel -j $((nt-1)) 'n=`zcat {} | grep -v "#" | wc -l`; echo {} $n' >> ${vcf_var/vcf.gz/numbers_in_vcf_files.ssv}
 
-## this thing does not work properly
 
 echo "vartotable processing"
 parallel -j $((nt-1)) "java $tmj -XX:ParallelGCThreads=1 -Xmx300g -jar $GATK/GenomeAnalysisTK.jar -T VariantsToTable \
@@ -413,9 +414,9 @@ parallel -j $((nt-1)) "java $tmj -XX:ParallelGCThreads=1 -Xmx300g -jar $GATK/Gen
 -V {} -AMD \
 -o vartable.{.}.tsv \
 -F CHROM -F POS -F QUAL -F QD -F DP -F MQ -F MQRankSum -F ReadPosRankSum -F FS -F HET -F SOR -F FILTER \
--GF DP -GF GQ &>/dev/null" ::: ${scaf}${bisnp_filt} ${scaf}${merged_filtered} ${scaf}${merged_fourfold_filtered}  ${scaf}${merged_fourfold/fourfold.gz/fourfold.dp8nc.m0.5.gz}
+-GF DP -GF GQ &>/dev/null" ::: scaffold_1lyrata_snp_raw.bifilt.vcf.gz # also fix
 
-for v in ${scaf}${novar_filt}
+for v in scaffold_1lyrata_all_raw.novarfilt.vcf.gz # fix 
 do
 java $tmj -XX:ParallelGCThreads=1 -Xmx300g -jar $GATK/GenomeAnalysisTK.jar -T VariantsToTable \
 -R $ref --showFiltered -log ${v}vartable.log \
@@ -429,7 +430,7 @@ echo "variant tables generated at `date`"
 ls *vartable
 
 ####bcftools stats
-bcftools stats $merged_filtered  >  ${merged_filtered/gz/bcfstat.txt}
+bcftools stats scaffold_1lyrata_snp_raw.fourfold.filtered.vcf.gz  >  scaffold_1lyrata_snp_raw.fourfold.filtered.vcf.bcfstat.txt
 
 #vcftools stats, depth and so on
 ####stats with R
@@ -453,7 +454,7 @@ bcftools stats $merged_filtered  >  ${merged_filtered/gz/bcfstat.txt}
 #ls R_results
 
 rm $vcf
-rm -r $ref 
+rm -r JIC_reference # todo universalize 
 rm $hetmask
 rm $fourfold 
 rm $dpmask

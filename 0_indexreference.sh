@@ -12,7 +12,7 @@ trap 'clean_scratch' TERM EXIT
 
 wd=$PBS_O_WORKDIR
 #ref="9172_ref_Sturnus_vulgaris-1.0_chrUn.fa.gz" # user input
-outdir=bwa
+#outdir=bwa
 cp ${wd}/${ref} $SCRATCHDIR
 cd $SCRATCHDIR
 ls
@@ -36,8 +36,8 @@ samtools faidx ${ref}
 
 bwa index ${ref}
 
-mkdir $outdir
-mv * $outdir/
+#mkdir $outdir
+#mv * $outdir/
 
-cp -r $outdir ${wd}/ || export CLEAN_SCRATCH=false
+cp * ${wd}/ || export CLEAN_SCRATCH=false
 
