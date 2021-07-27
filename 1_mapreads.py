@@ -213,7 +213,7 @@ for s in samples:
     ###samtools final stats
     sh.write('parallel -j '+str(ncpu-1)+' "samtools {} '+s+'dedup.bam > logstat/'+s+'.{}.txt" ::: idxstats flagstat stats\n\n')
 
-    sh.write("samtools depth -q 20 -Q 15"+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" + 
+    sh.write("samtools depth -q 20 -Q 15 "+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" + 
         " > logstat/depth_"+s+".txt \n")
    # sh.write("samtools depth -b "+coding+"  "+s+"dedup.bam | awk '{sum+=$3} END {print sum/NR}'" +
    #    " > logstat/codingdepth_"+s+".txt \necho stats done at `date`\n\n") # the file will contain one number: mean of coverage
