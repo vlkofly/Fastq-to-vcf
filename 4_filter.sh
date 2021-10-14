@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N F1_filter
-#PBS -l walltime=256:00:00
-#PBS -l select=1:ncpus=8:mem=650gb:scratch_local=800gb
+#PBS -l walltime=56:00:00
+#PBS -l select=1:ncpus=8:mem=50gb:scratch_local=800gb
 #PBS -j oe
 
 # This script takes the results of genotypeGVCF V3 filters data according GATK best practices.
